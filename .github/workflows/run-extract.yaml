@@ -1,4 +1,4 @@
-name: Skills Extraction
+name: Skills & Levels Extraction
 
 on:
   push:
@@ -6,8 +6,32 @@ on:
       - main
 
 jobs:
-  extract-skills:
+#  extract-skills:
+#    runs-on: ubuntu-latest
+#    env:
+#      DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
+#      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+#    steps:
+#      - uses: actions/checkout@v3
+#
+#      - name: Set up Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.x'
+#
+#      - name: Install dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          pip install -r requirements.txt
+#
+#      - name: Run skill extractor
+#        run: python skills.py
+
+  extract-skill-level:
     runs-on: ubuntu-latest
+    env:
+      DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
     steps:
       - uses: actions/checkout@v3
 
@@ -21,20 +45,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-#      - name: Run skill extractor
-#        env:
-#          DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
-#          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-#        run: python skills.py
-
       - name: Run skill level extractor
-        env:
-          DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: python level.py
 
+  extract-job-level:
+    runs-on: ubuntu-latest
+    env:
+      DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Run job level extractor
-        env:
-          DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: python job_level.py
