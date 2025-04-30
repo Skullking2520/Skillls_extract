@@ -5,9 +5,7 @@ import gspread
 from gspread_dataframe import get_as_dataframe
 from google.oauth2.service_account import Credentials
 from transformers import pipeline
-from gspread import Cell
 import numpy as np
-
 
 def bring_sheet():
     creds_info = json.loads(os.environ["GCP_SA_KEY"])
@@ -33,9 +31,9 @@ def main():
         ws.update_cell(1, len(header) + 1, "job_level")
         header.append("job_level")
 
-    skills_col = header.index("skills") + 1
+    skills_col   = header.index("skills") + 1
     skill_lv_col = header.index("skill_levels") + 1
-    job_lvl_col = header.index("job_level") + 1
+    job_lvl_col  = header.index("job_level") + 1
 
     zs = pipeline(
         "zero-shot-classification",
@@ -44,37 +42,27 @@ def main():
         device=0
     )
     skill_level_labels = ["Novice", "Advanced Beginner", "Competent", "Proficient", "Expert"]
-
-    level_to_num = {
-        "Novice": 1,
-        "Advanced Beginner": 2,
-        "Competent": 3,
-        "Proficient": 4,
-        "Expert": 5
-    }
-
-    buffer, cnt, BATCH = [], 0, 20
+    level_to_num = {"Novice":1, "Advanced Beginner":2, "Competent":3, "Proficient":4, "Expert":5}
 
     for r, row in enumerate(df.itertuples(index=False), start=2):
         if pd.notna(getattr(row, "skill_levels", None)) or not getattr(row, "skills", ""):
             continue
 
-        title = getattr(row, "job_title", "") or ""
-        desc = getattr(row, "description", "") or ""
+        title      = getattr(row, "job_title", "") or ""
+        desc       = getattr(row, "description", "") or ""
         raw_skills = getattr(row, "skills", "")
-        skills = [s.strip().strip('"') for s in raw_skills.split(",") if s.strip()]
+        skills     = [s.strip().strip('"') for s in raw_skills.split(",") if s.strip()]
 
-        pairs = []
-        nums = []
+        pairs, nums = [], []
         text = f"{title}. {desc}"
         for sk in skills:
             res = zs(text, skill_level_labels, multi_label=False)
             lvl = res["labels"][0]
             pairs.append(f"{sk}={lvl}")
-            nums.append(level_to_num[lvl])
+            nums.append(level_to_num.get(lvl, 0))
 
         lv_str = ", ".join(pairs) if pairs else "None"
-        avg = np.mean(nums) if nums else 0
+        avg = np.mean(nums) if nums else 0.0
 
         if avg == 0:
             jl = ""
@@ -85,19 +73,9 @@ def main():
         else:
             jl = "Senior Level"
 
-        buffer += [
-            Cell(r, skill_lv_col, lv_str),
-            Cell(r, job_lvl_col, jl)
-        ]
-        cnt += 1
-
-        if cnt % BATCH == 0:
-            ws.update_cells(buffer)
-            buffer.clear()
-
-    if buffer:
-        ws.update_cells(buffer)
-
+        ws.update_cell(r, skill_lv_col, lv_str)
+        ws.update_cell(r, job_lvl_col,  jl)
+        print(f"▶ ROW {r} 업데이트: skill_levels='{lv_str}', job_level='{jl}'")
 
 if __name__ == "__main__":
     main()
