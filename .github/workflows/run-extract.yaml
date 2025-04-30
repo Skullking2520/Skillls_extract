@@ -32,3 +32,9 @@ jobs:
           DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: python level.py
+
+      - name: Run job level extractor
+        env:
+          DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: python job_level.py

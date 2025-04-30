@@ -5,7 +5,6 @@ import gspread
 from gspread_dataframe import get_as_dataframe
 from google.oauth2.service_account import Credentials
 from transformers import pipeline
-import numpy as np
 
 def bring_sheet():
     creds_info = json.loads(os.environ["GCP_SA_KEY"])
@@ -27,22 +26,15 @@ def main():
     if "skill_levels" not in header:
         ws.update_cell(1, len(header) + 1, "skill_levels")
         header.append("skill_levels")
-    if "job_level" not in header:
-        ws.update_cell(1, len(header) + 1, "job_level")
-        header.append("job_level")
-
-    skills_col   = header.index("skills") + 1
     skill_lv_col = header.index("skill_levels") + 1
-    job_lvl_col  = header.index("job_level") + 1
 
     zs = pipeline(
         "zero-shot-classification",
         model="facebook/bart-large-mnli",
         hypothesis_template="This requires a {} level.",
-        device=0
+        device=-1
     )
     skill_level_labels = ["Novice", "Advanced Beginner", "Competent", "Proficient", "Expert"]
-    level_to_num = {"Novice":1, "Advanced Beginner":2, "Competent":3, "Proficient":4, "Expert":5}
 
     for r, row in enumerate(df.itertuples(index=False), start=2):
         if pd.notna(getattr(row, "skill_levels", None)) or not getattr(row, "skills", ""):
@@ -53,29 +45,16 @@ def main():
         raw_skills = getattr(row, "skills", "")
         skills     = [s.strip().strip('"') for s in raw_skills.split(",") if s.strip()]
 
-        pairs, nums = [], []
+        pairs = []
         text = f"{title}. {desc}"
         for sk in skills:
             res = zs(text, skill_level_labels, multi_label=False)
             lvl = res["labels"][0]
             pairs.append(f"{sk}={lvl}")
-            nums.append(level_to_num.get(lvl, 0))
 
         lv_str = ", ".join(pairs) if pairs else "None"
-        avg = np.mean(nums) if nums else 0.0
-
-        if avg == 0:
-            jl = ""
-        elif avg < 2:
-            jl = "Entry Level"
-        elif avg < 4:
-            jl = "Mid Level"
-        else:
-            jl = "Senior Level"
-
         ws.update_cell(r, skill_lv_col, lv_str)
-        ws.update_cell(r, job_lvl_col,  jl)
-        print(f"▶ ROW {r} 업데이트: skill_levels='{lv_str}', job_level='{jl}'")
+        print(f"ROW {r} update: skill_levels='{lv_str}'")
 
 if __name__ == "__main__":
     main()
