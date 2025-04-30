@@ -19,7 +19,7 @@ def bring_sheet():
         ]
     )
     client = gspread.authorize(creds)
-    return client.open_by_key(os.environ["DRIVE_KEY"]).worksheet("Sheet1")
+    return client.open_by_key(os.environ["DRIVE_KEY"]).worksheet("Skills Extraction")
 
 def main():
     ws = bring_sheet()
