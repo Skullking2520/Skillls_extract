@@ -26,19 +26,25 @@ def main():
         ws.update_cell(1, len(header) + 1, "skill_levels")
         header.append("skill_levels")
     skill_lv_col = header.index("skill_levels") + 1
+
     zs = pipeline(
         "zero-shot-classification",
         model="facebook/bart-large-mnli",
         device=-1
     )
     skill_level_labels = ["Novice", "Advanced Beginner", "Competent", "Proficient", "Expert"]
+
     for r, row in enumerate(df.itertuples(index=False), start=2):
-        if pd.notna(getattr(row, "skill_levels", None)) or not getattr(row, "skills", ""):
+        raw = getattr(row, "skills", None)
+        if pd.isna(raw) or not str(raw).strip():
             continue
+        if pd.notna(getattr(row, "skill_levels", None)):
+            continue
+
         title = getattr(row, "job_title", "") or ""
         desc = getattr(row, "description", "") or ""
-        raw_skills = getattr(row, "skills", "")
-        skills = [s.strip().strip('"') for s in raw_skills.split(",") if s.strip()]
+        skills = [s.strip().strip('"') for s in str(raw).split(",") if s.strip()]
+
         pairs = []
         base_text = f"{title}. {desc}"
         for sk in skills:
@@ -51,8 +57,10 @@ def main():
             )
             lvl = res["labels"][0]
             pairs.append(f"{sk}={lvl}")
+
         lv_str = ", ".join(pairs) if pairs else "None"
         ws.update_cell(r, skill_lv_col, lv_str)
+
     print("skill levels updated")
 
 if __name__ == "__main__":
