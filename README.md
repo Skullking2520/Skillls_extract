@@ -44,3 +44,21 @@ python job_level.py
 ## 현재 자동화 설정
 
 [workflow](.github/workflows/run-extract.yaml)는 `main` push 시 역량 수준·직무 수준 분류를 실행하도록 설정돼 있습니다. 역량 추출 job은 주석 처리돼 있으며, 세 단계가 자동으로 순차 실행되는 구조는 아닙니다. README 변경도 활성 job의 실행 계기가 될 수 있습니다.
+
+
+## 파일을 읽는 순서
+
+| 시작 파일 | 역할 |
+| --- | --- |
+| [skills.py](<skills.py>) | 문장 임베딩·FAISS로 역량 후보 검색 |
+| [skills_differ.py](<skills_differ.py>) | 역량 후보 목록 |
+| [level.py](<level.py>) | 역량 수준 분류 |
+| [job_level.py](<job_level.py>) | 직무 수준 분류 |
+
+전체 파일과 분할 스크립트는 [구조 안내](docs/STRUCTURE.md)에 정리했습니다.
+
+`skills.py`의 임베딩 검색과 `level.py`·`job_level.py`의 분류는 별도 단계입니다. 현재 자동화에서 어떤 단계가 활성화되어 있는지는 [워크플로](.github/workflows/run-extract.yaml)를 기준으로 확인합니다.
+
+## 저장소 관리
+
+실행 결과·인증 파일은 버전 관리에서 제외합니다. 공개 소스와 수집 데이터의 공개 범위는 구분하며, 인턴 업무 데이터·시트 접근 권한은 포함하지 않습니다. 보안 관련 내용은 [관리 기준](SECURITY.md)을 참고하세요.
