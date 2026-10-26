@@ -10,10 +10,10 @@ Seeka Technology 소프트웨어 개발 인턴 업무로 진행했습니다. 인
 
 | 코드 | 입력·처리 | 결과 |
 | --- | --- | --- |
-| [skills.py](skills.py) | 직무명·설명과 역량 목록을 임베딩하고 FAISS로 유사 역량 검색 | `skills` 열 |
-| [level.py](level.py) | 역량과 직무 문맥을 BART 기반 zero-shot 분류기에 입력 | `skill_levels` 열 |
-| [job_level.py](job_level.py) | 직무명·설명으로 직무 수준 분류 | `job_level` 열 |
-| [skills_differ.py](skills_differ.py) | 검색 대상 역량 목록 | 역량 추출 기준 목록 |
+| [skills.py](scripts/skills.py) | 직무명·설명과 역량 목록을 임베딩하고 FAISS로 유사 역량 검색 | `skills` 열 |
+| [level.py](scripts/level.py) | 역량과 직무 문맥을 BART 기반 zero-shot 분류기에 입력 | `skill_levels` 열 |
+| [job_level.py](scripts/job_level.py) | 직무명·설명으로 직무 수준 분류 | `job_level` 열 |
+| [skills_differ.py](scripts/skills_differ.py) | 검색 대상 역량 목록 | 역량 추출 기준 목록 |
 
 ## 사용 모델과 도구
 
@@ -36,29 +36,21 @@ python -m pip install -r requirements.txt
 
 ```bash
 # 입력 시트와 인증 설정을 준비한 뒤 필요한 단계만 실행
-python skills.py
-python level.py
-python job_level.py
+python scripts/skills.py
+python scripts/level.py
+python scripts/job_level.py
 ```
 
 ## 현재 자동화 설정
 
-[workflow](.github/workflows/run-extract.yaml)는 `main` push 시 역량 수준·직무 수준 분류를 실행하도록 설정돼 있습니다. 역량 추출 job은 주석 처리돼 있으며, 세 단계가 자동으로 순차 실행되는 구조는 아닙니다. README 변경도 활성 job의 실행 계기가 될 수 있습니다.
-
-
-## 파일을 읽는 순서
-
-| 시작 파일 | 역할 |
-| --- | --- |
-| [skills.py](<skills.py>) | 문장 임베딩·FAISS로 역량 후보 검색 |
-| [skills_differ.py](<skills_differ.py>) | 역량 후보 목록 |
-| [level.py](<level.py>) | 역량 수준 분류 |
-| [job_level.py](<job_level.py>) | 직무 수준 분류 |
-
-전체 파일과 분할 스크립트는 [구조 안내](docs/STRUCTURE.md)에 정리했습니다.
-
-`skills.py`의 임베딩 검색과 `level.py`·`job_level.py`의 분류는 별도 단계입니다. 현재 자동화에서 어떤 단계가 활성화되어 있는지는 [워크플로](.github/workflows/run-extract.yaml)를 기준으로 확인합니다.
+[workflow](.github/workflows/run-extract.yaml)는 `main` push 시 역량 수준·직무 수준 분류를 실행하도록 설정돼 있습니다. 역량 추출 job은 주석 처리돼 있으며, 세 단계가 자동으로 순차 실행되는 구조는 아닙니다. 워크플로의 경로 필터는 Python 소스·의존성 변경에만 반응하므로 문서 변경으로 분류 작업을 실행하지 않습니다.
 
 ## 저장소 관리
 
-실행 결과·인증 파일은 버전 관리에서 제외합니다. 공개 소스와 수집 데이터의 공개 범위는 구분하며, 인턴 업무 데이터·시트 접근 권한은 포함하지 않습니다. 보안 관련 내용은 [관리 기준](SECURITY.md)을 참고하세요.
+실행 결과·인증 파일은 버전 관리에서 제외합니다. 공개 소스와 수집 데이터의 공개 범위는 구분하며, 인턴 업무 데이터·시트 접근 권한은 포함하지 않습니다. 현재 파일의 제외 규칙은 이미 추적된 자료나 과거 커밋의 노출을 제거하지 않습니다.
+
+## 저장소 구성
+
+이번 정리에서 실행 코드와 보조 모듈을 `scripts/`로 옮겼습니다. 번호별 작업 구간과 기존 처리 로직은 유지합니다. 의존성과 설정 예시는 루트에 두며, 실행 명령의 기준 경로는 저장소 루트입니다.
+
+환경 변수 이름은 `GCP_SA_KEY`, `DRIVE_KEY`입니다. `.env.example`은 빈 설정 예시이며 자동으로 읽지 않습니다.
