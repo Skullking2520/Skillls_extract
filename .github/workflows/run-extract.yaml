@@ -1,12 +1,13 @@
 name: Skills & Levels Extraction
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "**/*.py"
-      - "requirements.txt"
+  workflow_dispatch:
+    inputs:
+      confirm_external_access:
+        description: "Run external collection or write to the configured test spreadsheet"
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -34,6 +35,7 @@ jobs:
 #        run: python scripts/skills.py
 
   extract-skill-level:
+    if: ${{ inputs.confirm_external_access == true }}
     runs-on: ubuntu-latest
     env:
       DRIVE_KEY: ${{ secrets.DRIVE_KEY }}
@@ -55,6 +57,7 @@ jobs:
         run: python scripts/level.py
 
   extract-job-level:
+    if: ${{ inputs.confirm_external_access == true }}
     runs-on: ubuntu-latest
     env:
       DRIVE_KEY: ${{ secrets.DRIVE_KEY }}

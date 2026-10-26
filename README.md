@@ -43,7 +43,7 @@ python scripts/job_level.py
 
 ## 현재 자동화 설정
 
-[workflow](.github/workflows/run-extract.yaml)는 `main` push 시 역량 수준·직무 수준 분류를 실행하도록 설정돼 있습니다. 역량 추출 job은 주석 처리돼 있으며, 세 단계가 자동으로 순차 실행되는 구조는 아닙니다. 워크플로의 경로 필터는 Python 소스·의존성 변경에만 반응하므로 문서 변경으로 분류 작업을 실행하지 않습니다.
+[워크플로](.github/workflows/run-extract.yaml)는 수동 실행만 허용합니다. `confirm_external_access`를 체크하면 기존 역량 수준·직무 수준 분류 job을 실행합니다. 역량 추출 job은 주석 처리 상태입니다. push·문서 변경·PR 병합으로 모델 호출이나 시트 쓰기를 실행하지 않습니다. 실행 전에 테스트 시트와 인증정보를 지정합니다.
 
 ## 저장소 관리
 
