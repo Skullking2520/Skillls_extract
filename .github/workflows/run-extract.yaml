@@ -9,6 +9,7 @@ on:
       - "docs/**"
       - ".gitignore"
       - ".env.example"
+      - ".github/workflows/**"
 
 permissions:
   contents: read
